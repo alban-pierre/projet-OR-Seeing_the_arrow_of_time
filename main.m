@@ -4,7 +4,9 @@ A = 2; % Number of angles in a descriptor
 D = 4; % Size of a descriptor
 K = 10; % Number of different descriptors after K-means
 N = 3; % Number of images to treat
+Nfr = [1,1,-1]; % Forward or reverse time in videos
 F = 4; % Number of flips of each videos
+Ffr = [1,1,-1,-1]; % Forward or reverse time in flips
 H = 100; % Video height
 W = 150; % Video width
 T = [10,6,9]; % Video time
@@ -53,3 +55,9 @@ for n=1:N
         histograms(:,(n-1)*F+f) = sum(repmat(imin,K,1)==repmat((1:10)', 1, Hs*Ws*Ts(1,n)),2);
     end
 end
+
+histograms = histograms ./ repmat(norm(histograms, 'columns'),K,1);
+
+fr = reshape(repmat(Ffr',1,N) .* repmat(Nfr,F,1), 1, N*F);
+
+
