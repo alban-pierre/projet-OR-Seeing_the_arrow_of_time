@@ -12,7 +12,7 @@ function [k, allk] = kmeans(X, K, epsilon)
     % K : Int   : Number of centers
 
     % Optionnal input :
-    % epsilon : Double : Precision wanted for the k centers
+    % epsilon : Double : Precision wanted for the k centers (norm(last_k - k) < epsilon)
 
     % Output :
     % k    : (D*K)     : Centers found

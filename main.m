@@ -12,8 +12,7 @@ Sh = 2; % Height subsampling
 St = 2; % Width subsampling 
 
 
-motions = randn(D*D*A, ceil(H/Sh)*ceil(W/Sw)*ceil(T/St));
+motions = randn(D*D*A, ceil(H/Sh)*ceil(W/Sw)*ceil(T/St)*N);
 
-
-
+[k, allk] = kmeans(motions,K,0.1);
 
