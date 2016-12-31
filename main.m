@@ -4,6 +4,7 @@ A = 2; % Number of angles in a descriptor
 D = 4; % Size of a descriptor
 K = 10; % Number of different descriptors after K-means
 N = 3; % Number of images to treat
+F = 4; % Number of flips of each videos
 H = 100; % Video height
 W = 150; % Video width
 T = [10,6,9]; % Video time
@@ -16,9 +17,12 @@ Ts = ceil(T/St); % Video height after subsampling
 
 
     % TODO Add here the computation of motion descriptors of structure :
-    % {n1, n2, n3, ..., nN}
-    %      |
-    %  ___/ \______________
+    % {n1f1, n2f1, n3f1, ..., nNf1;
+    %  n1f2, n2f2, n3f2, ..., nNf2;
+    %  n1f3, n2f3, n3f3, ..., nNf3;
+    %  n1f4, n2f4, n3f4, ..., nNf4}
+    %         |
+    %  ______/ \___________
     % /                    \
     % [t1, t2, t3, ..., tTs]
     %      |
@@ -32,19 +36,20 @@ Ts = ceil(T/St); % Video height after subsampling
 
 clear motions;
 for n=1:N
-    motions{n} = randn(D*D*A, Hs*Ws*Ts(1,n));
+    for f=1:F
+        motions{f,n} = randn(D*D*A, Hs*Ws*Ts(1,n));
+    end
 end
 
-[k, allk] = kmeans(cell2mat(motions),K,0.1);
+[k, allk] = kmeans(cell2mat(reshape(motions, 1, n*f)), K, 0.1);
 
-clear histograms;
+clear closestwords;
+histograms = zeros(K,F*N);
 for n=1:N
-	dd = sqdist(k,motions{n});
-	[~,imin] = min(dd,[],1);
-    histograms{n} = reshape(imin, Hs*Ws, Ts(1,n));
+    for f=1:F
+        dd = sqdist(k,motions{f,n});
+        [~,imin] = min(dd,[],1);
+        closestwords{f,n} = reshape(imin, Hs*Ws, Ts(1,n));
+        histograms(:,(n-1)*F+f) = sum(repmat(imin,K,1)==repmat((1:10)', 1, Hs*Ws*Ts(1,n)),2);
+    end
 end
-
-% If it is faster
-%dd = sqdist(k,cell2mat(motions));
-%[~,imin] = min(dd,[],1);
-%histograms = reshape(imin, Hs*Ws, sum(Ts,2));
