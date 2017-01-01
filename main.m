@@ -60,4 +60,68 @@ histograms = histograms ./ repmat(norm(histograms, 'columns'),K,1);
 
 fr = reshape(repmat(Ffr',1,N) .* repmat(Nfr,F,1), 1, N*F);
 
+X = histograms;
+y = fr;
+C = 10;
+mu = 15;
+tol = 0.001;
+
+
+X = [randn(2,300), [2;2]+randn(2,300)];
+y = [ones(1,300), -ones(1,300)];
+tt = time();
+[w, wor] = svm_p(X, y, C, mu, tol);
+time() - tt
+tt = time();
+[w2, wor2] = svm_d(X, y, C, mu, tol);
+time() - tt
+
+figure;
+plot(X(1,w'*X+wor>0), X(2,w'*X+wor>0), '.b')
+hold on;
+plot(X(1,w'*X+wor<0), X(2,w'*X+wor<0), '.r')
+
+figure;
+plot(X(1,w2'*X+wor2>0), X(2,w2'*X+wor2>0), '.b')
+hold on;
+plot(X(1,w2'*X+wor2<0), X(2,w2'*X+wor2<0), '.r')
+
+
+
+
+assert(false);
+
+
+
+
+n = size(X,1);
+d = size(X,2);
+
+[Q,p,A,b] = transform_svm_primal(C,X,y);
+x_0 = [zeros(d,1); 2*ones(n,1)+3*rand(n,1)];
+assert(all(A*x_0 - b <= 0));
+[x_sol, x_seq] = barr_method(Q,p,A,b,x_0,mu,tol);
+wp = x_sol(1:3,1);
+phi = @(x) (1/2*(x')*Q*x + p'*x);
+clear phixp;
+itp = size(x_seq,2);
+for i=1:itp
+    phixp(1,i) = phi(x_seq(:,i));
+end
+
+assert(false);
+
+
+[Q,p,A,b] = transform_svm_dual(C,X,y);
+x_0 = [C/4 + C/2*rand(n,1)];
+assert(all(A*x_0 - b <= 0));
+[x_sol, x_seq] = barr_method(Q,p,A,b,x_0,mu,tol);
+wd = X'*(x_sol.*y);
+w_seqd = X'*(x_seq.*repmat(y,1,size(x_seq,2)));
+z_seqd = max(1-repmat(y,1,size(x_seq,2)).*(X*w_seqd),0);
+clear phixd;
+itd = size(x_seq,2);
+for i=1:itd
+    phixd(1,i) = 1/2*norm(w_seqd(:,i)) + C*sum(z_seqd(:,i),1);
+end
 
