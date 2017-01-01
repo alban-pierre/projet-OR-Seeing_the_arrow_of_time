@@ -2,6 +2,7 @@
 [videos, Nfr, H, W, T] = load_dataset(1);
 N = size(videos,2);
 
+
 A = 2; % Number of angles in a descriptor
 D = 4; % Size of a descriptor
 K = 10; % Number of different descriptors after K-means
@@ -18,6 +19,10 @@ St = 2; % Width subsampling
 Hs = ceil(H/Sh); % Video height after subsampling
 Ws = ceil(W/Sw); % Video height after subsampling
 Ts = ceil(T/St); % Video height after subsampling
+
+C = 10; % SVM parameter
+mu = 15; % SVM parameter
+tol = 0.001; % Precision of SVM
 
 
     % Computation of motion descriptors of structure :
@@ -40,19 +45,19 @@ Ts = ceil(T/St); % Video height after subsampling
 
 
 if (true)
-	% Random initialisation
-	clear motions;
-	for n=1:N
-		for f=1:F
-			motions{f,n} = randn(D*D*A, Hs*Ws*Ts(1,n));
-		end
-	end
+    % Random initialisation
+    clear motions;
+    for n=1:N
+        for f=1:F
+            motions{f,n} = randn(D*D*A, Hs(1,n)*Ws(1,n)*Ts(1,n));
+        end
+    end
 end
 
 
 
 
-
+% Compute histograms
 [k, allk] = kmeans(cell2mat(reshape(motions, 1, n*f)), K, 0.1);
 
 clear closestwords;
@@ -61,8 +66,8 @@ for n=1:N
     for f=1:F
         dd = sqdist(k,motions{f,n});
         [~,imin] = min(dd,[],1);
-        closestwords{f,n} = reshape(imin, Hs*Ws, Ts(1,n));
-        histograms(:,(n-1)*F+f) = sum(repmat(imin,K,1)==repmat((1:10)', 1, Hs*Ws*Ts(1,n)),2);
+        closestwords{f,n} = reshape(imin, Hs(1,n)*Ws(1,n), Ts(1,n));
+        histograms(:,(n-1)*F+f) = sum(repmat(imin,K,1)==repmat((1:10)', 1, Hs(1,n)*Ws(1,n)*Ts(1,n)),2);
     end
 end
 
@@ -70,12 +75,20 @@ histograms = histograms ./ repmat(norm(histograms, 'columns'),K,1);
 
 fr = reshape(repmat(Ffr',1,N) .* repmat(Nfr,F,1), 1, N*F);
 
+
+
+
+% Now that we have histograms for each videos, we can do the train and test for different sets
+
+
+% Computes train and test sets
+ind = [1,0,1];
+
+
 X = histograms;
 y = fr;
-C = 10;
-mu = 15;
-tol = 0.001;
 
+% for i=1:size(ind,1)
 
 [w, wor] = svm_p(X, y, C, mu, tol);
 

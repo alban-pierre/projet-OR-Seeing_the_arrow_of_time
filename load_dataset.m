@@ -24,7 +24,7 @@ function [videos, Nfr, H, W, T] = load_dataset(n)
         T = [10,6,9];
         Nfr = [1,1,-1];
         for n=1:3
-            videos{1,n} = zeros(H(1,n)*W(1,n)*T(1,n));
+            videos{1,n} = zeros(H(1,n)*W(1,n), T(1,n));
         end
     end
 
