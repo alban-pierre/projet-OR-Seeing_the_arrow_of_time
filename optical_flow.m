@@ -1,10 +1,10 @@
-function opf = optical_flow(n_vid, frames, alpha, subsampling, maxIter)
+function [opfx, opfy] = optical_flow(n_vid, frames, alpha, subs, maxIter)
 
     if (nargin < 5)
-        maxIter = 10;
+        maxIter = 5; % peut erte reduit à 3
     end
     if (nargin < 4)
-        subsampling = 1;
+        subs = 1; % peut etre mis à 2 pour gagner un facteur ~3.
     end
     if (nargin < 4)
         alpha = 3;
@@ -29,7 +29,18 @@ function opf = optical_flow(n_vid, frames, alpha, subsampling, maxIter)
         filepathf = sprintf('%sim00000%d.jpeg', dr, f);
     end
     im1 = imread(filepathf);
-    
+
+    if (subs > 1)
+        s1 = (floor(size(im1,1)/subs));
+        s2 = (floor(size(im1,2)/subs));           
+        im1 = im1(1:subs*s1, 1:subs*s2, :);
+        im = zeros(s1, s2, 3, 'uint8');
+        im(:,:,1) = reshape(mean(reshape(reshape(mean(reshape(im1(:,:,1),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+        im(:,:,2) = reshape(mean(reshape(reshape(mean(reshape(im1(:,:,2),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+        im(:,:,3) = reshape(mean(reshape(reshape(mean(reshape(im1(:,:,3),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+        im1 = im;
+    end
+        
     f = frames(1,2);
     if (f < 10)
         filepathf = sprintf('%sim0000000%d.jpeg', dr, f);
@@ -39,11 +50,24 @@ function opf = optical_flow(n_vid, frames, alpha, subsampling, maxIter)
         filepathf = sprintf('%sim00000%d.jpeg', dr, f);
     end
     im2 = imread(filepathf);
+
+    if (subs > 1)
+        s1 = (floor(size(im2,1)/subs));
+        s2 = (floor(size(im2,2)/subs));           
+        im2 = im2(1:subs*s1, 1:subs*s2, :);
+        im = zeros(s1, s2, 3, 'uint8');
+        im(:,:,1) = reshape(mean(reshape(reshape(mean(reshape(im2(:,:,1),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+        im(:,:,2) = reshape(mean(reshape(reshape(mean(reshape(im2(:,:,2),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+        im(:,:,3) = reshape(mean(reshape(reshape(mean(reshape(im2(:,:,3),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+        im2 = im;
+    end
+    
     
     im1 = im1/2;
     im2 = im2/2;
     
-    opf = zeros(size(im1,1)-2, size(im1,2)-2,3, size(frames,2), 'int16');
+    opfx = zeros(size(im1,1)-2, size(im1,2)-2,3, size(frames,2), 'int8');
+    opfy = zeros(size(im1,1)-2, size(im1,2)-2,3, size(frames,2), 'int8');
     iopf = 1;
     
     for f = frames(1,2:end-1)
@@ -55,6 +79,16 @@ function opf = optical_flow(n_vid, frames, alpha, subsampling, maxIter)
             filepathf = sprintf('%sim00000%d.jpeg', dr, f+1);
         end
         im3 = imread(filepathf);
+        if (subs > 1)
+            s1 = (floor(size(im3,1)/subs));
+            s2 = (floor(size(im3,2)/subs));           
+            im3 = im3(1:subs*s1, 1:subs*s2, :);
+            im = zeros(s1, s2, 3, 'uint8');
+            im(:,:,1) = reshape(mean(reshape(reshape(mean(reshape(im3(:,:,1),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+            im(:,:,2) = reshape(mean(reshape(reshape(mean(reshape(im3(:,:,2),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+            im(:,:,3) = reshape(mean(reshape(reshape(mean(reshape(im3(:,:,3),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+            im3 = im;
+        end
         im3 = im3/2;
         
         %fx = zeros(size(im1,1)-2, size(im1,2)-2,3, 'int8');
@@ -90,7 +124,8 @@ function opf = optical_flow(n_vid, frames, alpha, subsampling, maxIter)
             v = int8(-int16(fy.*P)./D);
         end
 
-        opf(:,:,:,iopf) = int16(u.^2 + v.^2);
+        opfx(:,:,:,iopf) = u;
+        opfy(:,:,:,iopf) = v;
         iopf++;
 
         im1 = im2;
