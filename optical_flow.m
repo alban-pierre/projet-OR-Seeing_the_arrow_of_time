@@ -1,6 +1,15 @@
-function opf = optical_flow(n_vid, frames, alpha)
+function opf = optical_flow(n_vid, frames, alpha, subsampling, maxIter)
 
-    maxIter = 10;
+    if (nargin < 5)
+        maxIter = 10;
+    end
+    if (nargin < 4)
+        subsampling = 1;
+    end
+    if (nargin < 4)
+        alpha = 3;
+    end
+    
     
     if (n_vid < 10)
         dr = sprintf('ArrowDataAll/00%d/', n_vid);
@@ -12,16 +21,16 @@ function opf = optical_flow(n_vid, frames, alpha)
 
     
     f = frames(1,1);
-    if (f-1 < 10)
-        filepathf = sprintf('%sim0000000%d.jpeg', dr, f-1);
-    elseif (f-1 < 100)
-        filepathf = sprintf('%sim000000%d.jpeg', dr, f-1);
+    if (f < 10)
+        filepathf = sprintf('%sim0000000%d.jpeg', dr, f);
+    elseif (f < 100)
+        filepathf = sprintf('%sim000000%d.jpeg', dr, f);
     else
-        filepathf = sprintf('%sim00000%d.jpeg', dr, f-1);
+        filepathf = sprintf('%sim00000%d.jpeg', dr, f);
     end
     im1 = imread(filepathf);
     
-    f = frames(1,1);
+    f = frames(1,2);
     if (f < 10)
         filepathf = sprintf('%sim0000000%d.jpeg', dr, f);
     elseif (f < 100)
@@ -37,7 +46,7 @@ function opf = optical_flow(n_vid, frames, alpha)
     opf = zeros(size(im1,1)-2, size(im1,2)-2,3, size(frames,2), 'int16');
     iopf = 1;
     
-    for f = frames
+    for f = frames(1,2:end-1)
         if (f+1 < 10)
             filepathf = sprintf('%sim0000000%d.jpeg', dr, f+1);
         elseif (f+1 < 100)
