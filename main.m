@@ -1,7 +1,7 @@
 
 n_vid = 1;
 frames = 43:44;
-subs = 2;
+subs = 1;
 
 %for m=[]
 %    [opfx2, opfy2] = optical_flow_3_single(1, 1:3, 100, 1, m);
@@ -16,7 +16,7 @@ subs = 2;
 %imagesc(sqrt(sum(single(opfx1(:,:,:,1).^2+opfy1(:,:,:,1).^2),3)));
 
 tt = time();
-[opfx2, opfy2] = optical_flow_2_single(n_vid, frames, 100, subs, 20);
+[opfx2, opfy2] = optical_flow_2_single(n_vid, frames, 1, subs, 10, 20);
 time() - tt
 figure;
 %imagesc(sqrt(sum(single(opfx2(:,:,:,1).^2+opfy2(:,:,:,1).^2),3)));

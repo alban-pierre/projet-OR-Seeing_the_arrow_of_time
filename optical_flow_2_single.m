@@ -1,5 +1,8 @@
-function [opfx, opfy] = optical_flow_2_single(n_vid, frames, alpha, subs, maxIter)
+function [opfx, opfy] = optical_flow_2_single(n_vid, frames, alpha, subs, maxIter, blurr)
 
+    if (nargin < 6)
+        blurr = 0; % peut erte reduit à 3
+    end
     if (nargin < 5)
         maxIter = 5; % peut erte reduit à 3
     end
@@ -9,7 +12,6 @@ function [opfx, opfy] = optical_flow_2_single(n_vid, frames, alpha, subs, maxIte
     if (nargin < 4)
         alpha = 100;
     end
-    
     
     if (n_vid < 10)
         dr = sprintf('ArrowDataAll/00%d/', n_vid);
@@ -43,6 +45,18 @@ function [opfx, opfy] = optical_flow_2_single(n_vid, frames, alpha, subs, maxIte
     end
     
     im1 = im1/2;
+
+    if (blurr>0)
+        for c=1:3
+            im = single(im1(:,:,c));
+            [x, y] = meshgrid(-size(im,2)/2:(size(im,2)-1)/2,-size(im,1)/2:(size(im,1)-1)/2) ;
+            g = exp((-x.^2 - y.^2)/blurr);
+            g = fft2(g ./ sum(sum(g)));
+            im = real(ifft2(fft2(im).*g));
+            im = circshift(circshift(im',floor(size(im,2)/2))',floor(size(im,1)/2));
+            im1(:,:,c) = im;
+        end
+    end
     
     opfx = zeros(size(im1,1)-1, size(im1,2)-1,3, size(frames,2)-1, 'single');
     opfy = zeros(size(im1,1)-1, size(im1,2)-1,3, size(frames,2)-1, 'single');
@@ -70,6 +84,16 @@ function [opfx, opfy] = optical_flow_2_single(n_vid, frames, alpha, subs, maxIte
             im2 = im;
         end
         im2 = im2/2;
+
+        if (blurr>0)
+            for c=1:3
+                im = single(im2(:,:,c));
+                im = real(ifft2(fft2(im).*g));
+                im = circshift(circshift(im',floor(size(im,2)/2))',floor(size(im,1)/2));
+                im2(:,:,c) = im;
+            end
+        end
+    
         
         %fx = zeros(size(im1,1)-2, size(im1,2)-2,3, 'int8');
         %fy = zeros(size(im1,1)-2, size(im1,2)-2,3, 'int8');
