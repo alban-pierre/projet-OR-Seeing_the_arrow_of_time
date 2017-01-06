@@ -1,5 +1,8 @@
-function [opfx, opfy] = optical_flow_3_single(n_vid, frames, alpha, subs, maxIter)
+function [opfx, opfy] = optical_flow_3_single(n_vid, frames, alpha, subs, maxIter, df)
 
+    if (nargin < 6)
+        df = [-1,1,0]; % [-1,1,0] ou [-1,0,1]
+    end
     if (nargin < 5)
         maxIter = 5; % peut erte reduit à 3
     end
@@ -98,9 +101,9 @@ function [opfx, opfy] = optical_flow_3_single(n_vid, frames, alpha, subs, maxIte
         %fx = zeros(size(im1,1)-2, size(im1,2)-2,3, 'int8');
         %fy = zeros(size(im1,1)-2, size(im1,2)-2,3, 'int8');
         %ft = zeros(size(im1,1)-2, size(im1,2)-2,3, 'int8');
-        fx = im3(2:end-1,3:end,:) - im1(2:end-1,1:end-2,:);
-        fy = im3(3:end,2:end-1,:) - im1(1:end-2,2:end-1,:);
-        ft = im3(2:end-1,2:end-1,:) - im1(2:end-1,2:end-1,:);
+        fx = df(1,1)*im1(2:end-1,1:end-2,:) + df(1,2)*im2(2:end-1,2:end-1,:) + df(1,3)*im3(2:end-1,3:end,:);
+        fy = df(1,1)*im1(1:end-2,2:end-1,:) + df(1,2)*im2(2:end-1,2:end-1,:) + df(1,3)*im3(3:end,2:end-1,:);
+        ft = df(1,1)*im1(2:end-1,2:end-1,:) + df(1,2)*im2(2:end-1,2:end-1,:) + df(1,3)*im3(2:end-1,2:end-1,:);
         
         u = zeros(size(im1,1)-2, size(im1,2)-2,3, 'single');
         v = zeros(size(im1,1)-2, size(im1,2)-2,3, 'single');
