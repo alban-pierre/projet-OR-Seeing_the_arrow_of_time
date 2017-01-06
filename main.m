@@ -2,10 +2,11 @@ pkg load statistics
 pkg load signal
 
 
-n_vid = 1:5;
-frames = 1:11;
-subs = 2;
-show_one_layer = 1;
+n_vid = 1:3;
+Nfr = [-1, 1, 1];
+frames = 1:6;
+subs = 8;
+show_one_layer = 0;
 
 
 if (show_one_layer)
@@ -24,9 +25,11 @@ end
 
 % Computes optical flow
 
-for n=1:n_vid
+for n=n_vid
     [opfx{1,n}, opfy{1,n}] = optical_flow_2_single(n, frames, 20, subs, 5, 0);
-    [opfx{2,n}, opfy{2,n}] = optical_flow_2_single(n, frames, 20, subs, 5, 0);
+	printf('.');
+	[opfx{2,n}, opfy{2,n}] = optical_flow_2_single(n, frames, 20, subs, 5, 0);
+	printf('.');
 end
 
 
@@ -51,10 +54,10 @@ Ffr = [1,-1];%,-1,-1]; % Forward or reverse time in flips
 %T = [10,6,9]; % Video time
 Sh = 3; % Height subsampling 
 Sw = 5; % Width subsampling 
-St = 2; % Width subsampling 
-Hs = ceil(H/Sh); % Video height after subsampling
-Ws = ceil(W/Sw); % Video height after subsampling
-Ts = ceil(T/St); % Video height after subsampling
+St = 1; % Width subsampling 
+%Hs = floor((H-D+1)/Sh); % Video height after subsampling
+%Ws = floor((W-D+1)/Sw); % Video height after subsampling
+%Ts = floor((T-D+1)/St); % Video height after subsampling
 
 C = 10; % SVM parameter
 mu = 15; % SVM parameter
@@ -80,7 +83,7 @@ tol = 0.001; % Precision of SVM
     % [h1, h2, h3, ..., hHs]
 
 
-if (true)
+if (false)
     % Random initialisation
     clear motions;
     for n=1:N
@@ -91,9 +94,28 @@ if (true)
 else
     % Computes motions descriptors
     clear motions;
+    H = zeros(1,N);
+    W = zeros(1,N);
+    T = zeros(1,N);
     for n=1:N
+        H(1,n) = size(opfx{1,n},1);
+        W(1,n) = size(opfx{1,n},2);
+        T(1,n) = size(opfx{1,n},4);
+        Hs = floor((H-D+1)/Sh); % Video height after subsampling
+        Ws = floor((W-D+1)/Sw); % Video height after subsampling
+        Ts = floor(T/St); % Video height after subsampling
         for f=1:F
-            motions{f,n} = randn(D*D*A, Hs(1,n)*Ws(1,n)*Ts(1,n));
+            for t=1:T
+                i = 1;
+                for dh=1:D
+                    for dw=1:D
+                        motions{f,n}(i,:) = reshape(mean(opfx{f,n},3)(dh+Sh*(0:Hs(1,n)-1), dw+Sw*(0:Ws(1,n)-1), 1, :), 1, Hs(1,n)*Ws(1,n)*Ts(1,n));
+                        motions{f,n}(i+1,:) = reshape(mean(opfy{f,n},3)(dh+Sh*(0:Hs(1,n)-1), dw+Sw*(0:Ws(1,n)-1), 1, :), 1, Hs(1,n)*Ws(1,n)*Ts(1,n));
+                        i = i+1;
+                    end
+                end
+            end
+            %motions{f,n} = randn(D*D*A, Hs(1,n)*Ws(1,n)*Ts(1,n));
         end
     end
 
