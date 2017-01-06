@@ -19,13 +19,13 @@ subs = 1;
 %imagesc(sqrt(sum(single(opfx1(:,:,:,1).^2+opfy1(:,:,:,1).^2),3)));
 
 tt = time();
-[opfx2, opfy2] = optical_flow_2_single(n_vid, frames, 1, subs, 10, 10);
+[opfx, opfy,im1_pyr, im2_pyr] = multilayer_optical_flow_2_single(n_vid, frames, 10, subs, 3, 0);
 time() - tt
 figure;
 %imagesc(sqrt(sum(single(opfx2(:,:,:,1).^2+opfy2(:,:,:,1).^2),3)));
-imagesc(sum(single(opfx2(:,:,:,1)),3));
+imagesc(mean(single(opfx{4}(:,:,:,1)),3));
 figure;
-imagesc(sum(single(opfy2(:,:,:,1)),3));
+imagesc(mean(single(opfy{4}(:,:,:,1)),3));
 
 assert(false);
 
