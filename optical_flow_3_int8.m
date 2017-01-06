@@ -1,4 +1,4 @@
-function [opfx, opfy] = optical_flow(n_vid, frames, alpha, subs, maxIter)
+function [opfx, opfy] = optical_flow_3_int8(n_vid, frames, alpha, subs, maxIter)
 
     if (nargin < 5)
         maxIter = 5; % peut erte reduit à 3

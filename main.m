@@ -1,4 +1,28 @@
 
+n_vid = 1;
+frames = 1:3;
+subs = 2;
+
+for m=[]
+    [opfx2, opfy2] = optical_flow_3_single(1, 1:3, 100, 1, m);
+    figure;
+    imagesc(sqrt(sum(single(opfx2(:,:,:,1).^2+opfy2(:,:,:,1).^2),3)));
+end
+
+tt = time();
+[opfx1, opfy1] = optical_flow_3_int8(n_vid, frames, 3, subs, 3);
+time() - tt
+figure;
+imagesc(sqrt(sum(single(opfx1(:,:,:,1).^2+opfy1(:,:,:,1).^2),3)));
+
+tt = time();
+[opfx2, opfy2] = optical_flow_3_single(n_vid, frames, 100, subs, 3);
+time() - tt
+figure;
+imagesc(sqrt(sum(single(opfx2(:,:,:,1).^2+opfy2(:,:,:,1).^2),3)));
+
+assert(false);
+
 [videos, Nfr, H, W, T] = load_dataset(1);
 N = size(videos,2);
 
