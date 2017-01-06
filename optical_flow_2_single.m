@@ -1,7 +1,7 @@
-function [opfx, opfy] = optical_flow_2_single(n_vid, frames, alpha, subs, maxIter, blurr)
+function [opfx, opfy] = optical_flow_2_single(n_vid, frames, alpha, subs, maxIter, blur)
 
     if (nargin < 6)
-        blurr = 0; % peut erte reduit à 3
+        blur = 0; % peut erte reduit à 3
     end
     if (nargin < 5)
         maxIter = 5; % peut erte reduit à 3
@@ -34,28 +34,35 @@ function [opfx, opfy] = optical_flow_2_single(n_vid, frames, alpha, subs, maxIte
     im1 = single(im1);
     
     if (subs > 1)
+        %s1 = (ceil(size(im1,1)/subs));
+        %s2 = (ceil(size(im1,2)/subs));           
+        %im(:,:,1) = downsample(downsample(conv2(im1(:,:,1),ones(subs)/(subs*subs))',subs,subs-1)',subs,subs-1);
+        %im(:,:,2) = downsample(downsample(conv2(im1(:,:,2),ones(subs)/(subs*subs))',subs,subs-1)',subs,subs-1);
+        %im(:,:,3) = downsample(downsample(conv2(im1(:,:,3),ones(subs)/(subs*subs))',subs,subs-1)',subs,subs-1);
+        %if (size(im1,1) < s1*subs)
+        %    im(end,:,:) = im(end,:,:) * subs/(size(im1,1) - (s1-1)*subs);
+        %end
+        %if (size(im1,2) < s2*subs)
+        %    im(:,end,:) = im(:,end,:) * subs/(size(im1,2) - (s2-1)*subs);
+        %end
         s1 = (floor(size(im1,1)/subs));
-        s2 = (floor(size(im1,2)/subs));           
-        im1 = im1(1:subs*s1, 1:subs*s2, :);
+        s2 = (floor(size(im1,2)/subs));
         im = zeros(s1, s2, 3, 'single');
-        im(:,:,1) = reshape(mean(reshape(reshape(mean(reshape(im1(:,:,1),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
-        im(:,:,2) = reshape(mean(reshape(reshape(mean(reshape(im1(:,:,2),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
-        im(:,:,3) = reshape(mean(reshape(reshape(mean(reshape(im1(:,:,3),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+        im(:,:,1) = downsample(downsample(conv2(im1(:,:,1),ones(subs)/(subs*subs), 'valid')',subs)',subs);
+        im(:,:,2) = downsample(downsample(conv2(im1(:,:,2),ones(subs)/(subs*subs), 'valid')',subs)',subs);
+        im(:,:,3) = downsample(downsample(conv2(im1(:,:,3),ones(subs)/(subs*subs), 'valid')',subs)',subs);
         im1 = im;
     end
     
     im1 = im1/2;
 
-    if (blurr>0)
-        for c=1:3
-            im = single(im1(:,:,c));
-            [x, y] = meshgrid(-size(im,2)/2:(size(im,2)-1)/2,-size(im,1)/2:(size(im,1)-1)/2) ;
-            g = exp((-x.^2 - y.^2)/blurr);
-            g = fft2(g ./ sum(sum(g)));
-            im = real(ifft2(fft2(im).*g));
-            im = circshift(circshift(im',floor(size(im,2)/2))',floor(size(im,1)/2));
-            im1(:,:,c) = im;
-        end
+    if (blur>0)
+        [x, y] = meshgrid(-blur:blur,-blur:blur) ;
+        g = exp((-x.^2 - y.^2)/blur);
+        g = g ./ sum(sum(g));
+        im1(:,:,1) = conv2(single(im1(:,:,1)),g,'same');
+        im1(:,:,2) = conv2(single(im1(:,:,2)),g,'same');
+        im1(:,:,3) = conv2(single(im1(:,:,3)),g,'same');
     end
     
     opfx = zeros(size(im1,1)-1, size(im1,2)-1,3, size(frames,2)-1, 'single');
@@ -75,23 +82,19 @@ function [opfx, opfy] = optical_flow_2_single(n_vid, frames, alpha, subs, maxIte
 
         if (subs > 1)
             s1 = (floor(size(im2,1)/subs));
-            s2 = (floor(size(im2,2)/subs));           
-            im2 = im2(1:subs*s1, 1:subs*s2, :);
+            s2 = (floor(size(im2,2)/subs));
             im = zeros(s1, s2, 3, 'single');
-            im(:,:,1) = reshape(mean(reshape(reshape(mean(reshape(im2(:,:,1),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
-            im(:,:,2) = reshape(mean(reshape(reshape(mean(reshape(im2(:,:,2),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
-            im(:,:,3) = reshape(mean(reshape(reshape(mean(reshape(im2(:,:,3),subs,s1*subs*s2),1),s1,s2*subs)',subs,s1*s2),1),s2,s1)';
+            im(:,:,1) = downsample(downsample(conv2(im2(:,:,1),ones(subs)/(subs*subs), 'valid')',subs)',subs);
+            im(:,:,2) = downsample(downsample(conv2(im2(:,:,2),ones(subs)/(subs*subs), 'valid')',subs)',subs);
+            im(:,:,3) = downsample(downsample(conv2(im2(:,:,3),ones(subs)/(subs*subs), 'valid')',subs)',subs);
             im2 = im;
         end
         im2 = im2/2;
 
-        if (blurr>0)
-            for c=1:3
-                im = single(im2(:,:,c));
-                im = real(ifft2(fft2(im).*g));
-                im = circshift(circshift(im',floor(size(im,2)/2))',floor(size(im,1)/2));
-                im2(:,:,c) = im;
-            end
+        if (blur>0)
+            im2(:,:,1) = conv2(single(im2(:,:,1)),g,'same');
+            im2(:,:,2) = conv2(single(im2(:,:,2)),g,'same');
+            im2(:,:,3) = conv2(single(im2(:,:,3)),g,'same');
         end
     
         

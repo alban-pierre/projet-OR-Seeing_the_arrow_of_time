@@ -1,3 +1,6 @@
+pkg load statistics
+pkg load signal
+
 
 n_vid = 1;
 frames = 43:44;
@@ -16,7 +19,7 @@ subs = 1;
 %imagesc(sqrt(sum(single(opfx1(:,:,:,1).^2+opfy1(:,:,:,1).^2),3)));
 
 tt = time();
-[opfx2, opfy2] = optical_flow_2_single(n_vid, frames, 1, subs, 10, 20);
+[opfx2, opfy2] = optical_flow_2_single(n_vid, frames, 1, subs, 10, 10);
 time() - tt
 figure;
 %imagesc(sqrt(sum(single(opfx2(:,:,:,1).^2+opfy2(:,:,:,1).^2),3)));
