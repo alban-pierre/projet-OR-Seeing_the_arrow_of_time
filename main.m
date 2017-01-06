@@ -27,11 +27,11 @@ end
 
 for n=n_vid
     [opfx{1,n}, opfy{1,n}] = optical_flow_2_single(n, frames, 20, subs, 5, 0);
-	printf('.');
-	[opfx{2,n}, opfy{2,n}] = optical_flow_2_single(n, frames, 20, subs, 5, 0);
-	printf('.');
+    fprintf(2,'.');
+    [opfx{2,n}, opfy{2,n}] = optical_flow_2_single(n, frames, 20, subs, 5, 0);
+    fprintf(2,'.');
 end
-
+fprintf(2,'\n');
 
 
 
@@ -40,7 +40,7 @@ end
 %[videos, Nfr, H, W, T] = load_dataset(1);
 %N = size(videos,2);
 
-N = n_vid;
+N = n_vid(1,end);
 
 A = 2; % Number of angles in a descriptor
 D = 4; % Size of a descriptor
@@ -111,7 +111,7 @@ else
                     for dw=1:D
                         motions{f,n}(i,:) = reshape(mean(opfx{f,n},3)(dh+Sh*(0:Hs(1,n)-1), dw+Sw*(0:Ws(1,n)-1), 1, :), 1, Hs(1,n)*Ws(1,n)*Ts(1,n));
                         motions{f,n}(i+1,:) = reshape(mean(opfy{f,n},3)(dh+Sh*(0:Hs(1,n)-1), dw+Sw*(0:Ws(1,n)-1), 1, :), 1, Hs(1,n)*Ws(1,n)*Ts(1,n));
-                        i = i+1;
+                        i = i+2;
                     end
                 end
             end
