@@ -2,8 +2,8 @@ pkg load statistics
 pkg load signal
 
 
-n_vid = 1;
-frames = 43:44;
+n_vid = 1:5;
+frames = 1:11;
 subs = 2;
 show_one_layer = 1;
 
@@ -22,25 +22,30 @@ if (show_one_layer)
 end
 
 
-[opfx1, opfy1] = optical_flow_3_single(1, frames, 100, subs, 5);
-[opfx2, opfy2] = optical_flow_3_single(1, frames, 100, subs, 5);
-[opfx3, opfy3] = optical_flow_3_single(1, frames, 100, subs, 5);
-[opfx4, opfy4] = optical_flow_3_single(1, frames, 100, subs, 5);
-[opfx5, opfy5] = optical_flow_3_single(1, frames, 100, subs, 5);
+% Computes optical flow
+
+for n=1:n_vid
+    [opfx{1,n}, opfy{1,n}] = optical_flow_2_single(n, frames, 20, subs, 5, 0);
+    [opfx{2,n}, opfy{2,n}] = optical_flow_2_single(n, frames, 20, subs, 5, 0);
+end
 
 
 
-[videos, Nfr, H, W, T] = load_dataset(1);
-N = size(videos,2);
 
+
+
+%[videos, Nfr, H, W, T] = load_dataset(1);
+%N = size(videos,2);
+
+N = n_vid;
 
 A = 2; % Number of angles in a descriptor
 D = 4; % Size of a descriptor
 K = 10; % Number of different descriptors after K-means
 %N = 3; % Number of images to treat
 %Nfr = [1,1,-1]; % Forward or reverse time in videos
-F = 4; % Number of flips of each videos
-Ffr = [1,1,-1,-1]; % Forward or reverse time in flips
+F = 2; % Number of flips of each videos
+Ffr = [1,-1];%,-1,-1]; % Forward or reverse time in flips
 %H = 100; % Video height
 %W = 150; % Video width
 %T = [10,6,9]; % Video time
@@ -83,6 +88,15 @@ if (true)
             motions{f,n} = randn(D*D*A, Hs(1,n)*Ws(1,n)*Ts(1,n));
         end
     end
+else
+    % Computes motions descriptors
+    clear motions;
+    for n=1:N
+        for f=1:F
+            motions{f,n} = randn(D*D*A, Hs(1,n)*Ws(1,n)*Ts(1,n));
+        end
+    end
+
 end
 
 
