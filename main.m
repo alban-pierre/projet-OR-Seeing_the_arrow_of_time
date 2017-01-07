@@ -1,4 +1,4 @@
-parts = 3;
+parts = 1;
 
 
 if (parts < 2)
@@ -32,7 +32,7 @@ if (parts < 2)
     % Computes optical flow
 
     N = size(n_vid,2);
-	frames_neg = frames(1,size(frames,2):-1:1);
+    frames_neg = frames(1,size(frames,2):-1:1);
     for n=1:N
         [opfx{1,n}, opfy{1,n}] = optical_flow_2_single(n_vid(1,n), frames, 20, subs, 5, 0);
         fprintf(2,'.');
@@ -114,25 +114,22 @@ if (parts < 3)
             Ws = floor((W-D+1)/Sw); % Video height after subsampling
             Ts = floor(T/St); % Video height after subsampling
             for f=1:F
-                %for t=1:T
-                    i = 1;
-                    for dh=1:D
-                        for dw=1:D
-                            motions{f,n}(i,:) = reshape(mean(opfx{f,n},3)(dh+Sh*(0:Hs(1,n)-1), dw+Sw*(0:Ws(1,n)-1), 1, :), 1, Hs(1,n)*Ws(1,n)*Ts(1,n));
-                            motions{f,n}(i+1,:) = reshape(mean(opfy{f,n},3)(dh+Sh*(0:Hs(1,n)-1), dw+Sw*(0:Ws(1,n)-1), 1, :), 1, Hs(1,n)*Ws(1,n)*Ts(1,n));
-                            i = i+2;
-                        end
+                i = 1;
+                for dh=1:D
+                    for dw=1:D
+                        motions{f,n}(i,:) = reshape(mean(opfx{f,n},3)(dh+Sh*(0:Hs(1,n)-1), dw+Sw*(0:Ws(1,n)-1), 1, :), 1, Hs(1,n)*Ws(1,n)*Ts(1,n));
+                        motions{f,n}(i+1,:) = reshape(mean(opfy{f,n},3)(dh+Sh*(0:Hs(1,n)-1), dw+Sw*(0:Ws(1,n)-1), 1, :), 1, Hs(1,n)*Ws(1,n)*Ts(1,n));
+                        i = i+2;
                     end
-                    keep = sum(abs(motions{f,n}),1) > threshold;
-                    fprintf("Proportion = %d\n", sum(keep,2)/size(keep,2));
-                    motions{f,n} = motions{f,n}(:,keep);
-                %end
-    %motions{f,n} = randn(D*D*A, Hs(1,n)*Ws(1,n)*Ts(1,n));
+                end
+                keep = sum(abs(motions{f,n}),1) > threshold;
+                fprintf("Proportion = %d\n", sum(keep,2)/size(keep,2));
+                motions{f,n} = motions{f,n}(:,keep);
                 fprintf(2,'.');
             end
         end
         fprintf(2,'\n');
-
+        
     end
 end
 
@@ -164,6 +161,8 @@ end
 
 % Computes train and test sets
 ind = ones(20,1);%[1,1,1];
+r = randperm(20);
+ind = sum((r == (1:20)')(:,1:15),2)';
 
 ind = reshape(repmat(ind,F,1), 1, N*F);
 
@@ -174,5 +173,13 @@ y = fr(:,ind>0.5);
 
 [w, wor] = svm_p(X, y, C, mu, tol);
 
+
+X = histograms;
+y = fr;
+
 fr_l = ((w'*X+wor>0)*2-1)
 
+
+
+err_train = sum(fr_l.*fr.*ind < -0.5) / 30
+err_test = sum(fr_l.*fr.*(1-ind) < -0.5) / 10
