@@ -53,18 +53,18 @@ if (parts < 2)
     
     opts.alpha = 1;
     opts.batchsize = 5;
-    opts.numepochs = 1;
+    opts.numepochs = 10;
 
     for n=1:N
         for f=frames
 %            train_x = zeros(H, W, T, n);
-            train_x(:,:,f,n) = mean(single(loadimage(n_vid(1,n), f, H, W))/255,3);
-            train_x(:,:,T-f+1,N+n) = mean(single(loadimage(n_vid(1,n), f, H, W))/255,3);
+            train_x(:,:,f,n) = single(mean(single(loadimage(n_vid(1,n), f, H, W))/255,3));
+            train_x(:,:,T-f+1,N+n) = single(mean(single(loadimage(n_vid(1,n), f, H, W))/255,3));
         end
     end
     
-    train_y = (Nfr == [1;, -1]);
-    train_y = [train_y, -train_y];
+    train_y = (Nfr == [1; -1]);
+    train_y = [train_y, 1-train_y];
         
     cnn = cnntrain(cnn, train_x, train_y, opts);
     fprintf(2,'.');
