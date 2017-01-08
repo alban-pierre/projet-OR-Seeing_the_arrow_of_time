@@ -8,33 +8,80 @@ if (parts < 2)
     pkg load signal;
     pkg load image;
 
+    addpath('DeepLearnToolbox-modified/CNN/');
+    addpath('DeepLearnToolbox-modified/data/'); 
+    addpath('DeepLearnToolbox-modified/util/');
+    
     n_vid = [1:10,26:35];
     Nfr = [-ones(1,10), ones(1,10)];%[-1, 1, 1];
-    frames = 1:16;
+    frames = 1:86;
     subs = 4;
     show_one_layer = 0;
     threshold = 10;
-    W = 1920/4;
-    H = 1080/4;
-
-
+    W = 182;
+    H = 102;
 
     N = size(n_vid,2);
+    T = size(frames, 2);
+    
+    r = randperm(N);
+    n_vid = n_vid(1,r);
+    Nfr = Nfr(1,r);
+    
     frames_neg = frames(1,size(frames,2):-1:1);
 
-    for f=frames
-        for n=1:N
-            for c=1:3
-                train_x(:,:,1,2*(c-1)+1) = 
+    rand('state',0)
+    cnn.layers = {
+                  struct('type', 'i') %input layer
+                  struct('type', 'c', 'outputmaps', 6, 'kernelsize', 3) %convolution layer
+                  struct('type', 's', 'scale', 2) %sub sampling layer
+                  struct('type', 'c', 'outputmaps', 9, 'kernelsize', 3) %convolution layer
+                  struct('type', 's', 'scale', 2) %subsampling layer
+                  struct('type', 'c', 'outputmaps', 12, 'kernelsize', 5) %convolution layer
+                  struct('type', 's', 'scale', 2) %sub sampling layer
+                  struct('type', 'c', 'outputmaps', 18, 'kernelsize', 7) %convolution layer
+                  struct('type', 's', 'scale', 2) %subsampling layer
+%                  struct('type', 'c', 'outputmaps', 6, 'kernelsize', 5) %convolution layer
+%                  struct('type', 's', 'scale', 2) %subsampling layer
+%                  struct('type', 'c', 'outputmaps', 12, 'kernelsize', 5) %convolution layer
+%                  struct('type', 's', 'scale', 2) %subsampling layer
+    };
 
-            end
+    train_x = zeros(H, W, T, 2*N);
+    train_y = (Nfr == [1;, -1]);
+    cnn = cnnsetup(cnn, train_x, train_y);
+    
+    opts.alpha = 1;
+    opts.batchsize = 5;
+    opts.numepochs = 1;
+
+    for n=1:N
+        for f=frames
+%            train_x = zeros(H, W, T, n);
+            train_x(:,:,f,n) = mean(single(loadimage(n_vid(1,n), f, H, W))/255,3);
+            train_x(:,:,T-f+1,N+n) = mean(single(loadimage(n_vid(1,n), f, H, W))/255,3);
         end
     end
+    
+    train_y = (Nfr == [1;, -1]);
+    train_y = [train_y, -train_y];
+        
+    cnn = cnntrain(cnn, train_x, train_y, opts);
+    fprintf(2,'.');
+        
+    end
     fprintf(2,'\n');
+
+    size(cnn.fv)
+
+
+
+    
     
 end
 
 
+assert(false);
 
     %[videos, Nfr, H, W, T] = load_dataset(1);
     %N = size(videos,2);
