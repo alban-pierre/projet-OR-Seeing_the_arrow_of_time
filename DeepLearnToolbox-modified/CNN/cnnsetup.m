@@ -1,8 +1,8 @@
 function net = cnnsetup(net, x, y)
     assert(~isOctave() || compare_versions(OCTAVE_VERSION, '3.8.0', '>='), ['Octave 3.8.0 or greater is required for CNNs as there is a bug in convolution in previous versions. See http://savannah.gnu.org/bugs/?39314. Your version is ' myOctaveVersion]);
-    %inputmaps = 1;
-    inputmaps = net.layers{1}.inputmaps;
-    mapsize = size(squeeze(x(:, :, 1)));
+    inputmaps = 1;
+    %inputmaps = net.layers{1}.inputmaps;
+    mapsize = size(squeeze(x(:, :, :, 1))); %m
 
     for l = 1 : numel(net.layers)   %  layer
         if strcmp(net.layers{l}.type, 's')
@@ -14,11 +14,11 @@ function net = cnnsetup(net, x, y)
         end
         if strcmp(net.layers{l}.type, 'c')
             mapsize = mapsize - net.layers{l}.kernelsize + 1;
-            fan_out = net.layers{l}.outputmaps * net.layers{l}.kernelsize ^ 2;
+            fan_out = net.layers{l}.outputmaps * net.layers{l}.kernelsize ^ 3; %m
             for j = 1 : net.layers{l}.outputmaps  %  output map
-                fan_in = inputmaps * net.layers{l}.kernelsize ^ 2;
+                fan_in = inputmaps * net.layers{l}.kernelsize ^ 3; %m
                 for i = 1 : inputmaps  %  input map
-                    net.layers{l}.k{i}{j} = (rand(net.layers{l}.kernelsize) - 0.5) * 2 * sqrt(6 / (fan_in + fan_out));
+                    net.layers{l}.k{i}{j} = (rand(net.layers{l}.kernelsize, net.layers{l}.kernelsize, net.layers{l}.kernelsize) - 0.5) * 2 * nthroot(6 / (fan_in + fan_out),3); %m
                 end
                 net.layers{l}.b{j} = 0;
             end

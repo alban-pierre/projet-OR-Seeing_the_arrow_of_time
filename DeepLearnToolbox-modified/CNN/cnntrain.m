@@ -1,5 +1,5 @@
 function net = cnntrain(net, x, y, opts)
-    m = size(x, 3);
+    m = size(x, 4); %m
     numbatches = m / opts.batchsize;
     %numbatches = m / (opts.batchsize * net.layers{1}.inputmaps);
     if rem(numbatches, 1) ~= 0
@@ -15,8 +15,8 @@ function net = cnntrain(net, x, y, opts)
         tic;
         kk = randperm(m);
         for l = 1 : numbatches
-            batch_x = x(:, :, kk((l - 1) * opts.batchsize + 1 : l * opts.batchsize), :);
-            batch_y = y(:,    kk((l - 1) * opts.batchsize + 1 : l * opts.batchsize));
+            batch_x = x(:, :, :, kk((l - 1) * opts.batchsize + 1 : l * opts.batchsize)); %m
+            batch_y = y(:,       kk((l - 1) * opts.batchsize + 1 : l * opts.batchsize)); %(m)
 
             net = cnnff(net, batch_x);
             net = cnnbp(net, batch_y);
