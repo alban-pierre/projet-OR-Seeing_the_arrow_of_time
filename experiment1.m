@@ -1,11 +1,12 @@
-parts = 1;
+% Train and test based on optical flow descriptors
 
+parts = 1;
 
 if (parts < 2)
 
-    pkg load statistics
-    pkg load signal
-
+    pkg load statistics;
+    pkg load signal;
+    pkg load image;
 
     n_vid = [1:10,26:35];
     Nfr = [-ones(1,10), ones(1,10)];%[-1, 1, 1];
@@ -33,6 +34,7 @@ if (parts < 2)
 
     N = size(n_vid,2);
     frames_neg = frames(1,size(frames,2):-1:1);
+    %optical flow descriptors;
     for n=1:N
         [opfx{1,n}, opfy{1,n}] = optical_flow_2_single(n_vid(1,n), frames, 20, subs, 5, 0);
         fprintf(2,'.');
@@ -40,7 +42,7 @@ if (parts < 2)
         fprintf(2,'.');
     end
     fprintf(2,'\n');
-
+    
 end
 
 
