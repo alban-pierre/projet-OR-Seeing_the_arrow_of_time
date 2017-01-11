@@ -69,7 +69,7 @@ Alban Pierre
 	
 	\begin{frame}
 		\section {Computation of descriptors}
-		\frametitle{Optical flow descriptors}
+		\frametitle{Optical flow descriptors with Horn-Schunck method}
 		
 		\begin{itemize}
 			\item Assumes brightness constancy $f(x,y,t) = f(x+dx, y+dy, t+dt)$
@@ -80,21 +80,54 @@ Alban Pierre
 		\[v = v_{av} - fy\frac{fx u_{av} + fy v_{av} + ft}{\alpha + fx^2 + fy^2}\]
 	\end{frame}
 	
+	\begin{frame}
+		\frametitle{Optical flow descriptors with Horn-Schunck method}
+		
+		\begin{figure}[h]
+			\begin{minipage}[b]{.49\linewidth}
+				\includegraphics[width=1.0\textwidth]{ofx.png}
+				%\caption{1000 first iterations (3*2, one)}
+			\end{minipage}
+			\hfill
+			\begin{minipage}[b]{0.49\linewidth}
+				\includegraphics[width=1.0\textwidth]{ofy.png}
+				%\caption{1000 last iterations (3*2, one)}
+			\end{minipage}
+			\label{fig:f}
+		\end{figure}
+		
+	\end{frame}
 	
 	\begin{frame}
-		\frametitle{}
+		\frametitle{Coarse-to-fine optical flow descriptors}
+		
+			Compute Horn-Schunck method for different scales
+			\newline
+			
+			Warp a coarse result in a finer image as an initialization
 		
 	\end{frame}
 	
 	
 	\begin{frame}
-		\frametitle{}
+		\frametitle{Convolutional Neural Network Descriptors}
 		
+		\begin{itemize}
+			\item Train a CNN on videos for classification, recognition or something else
+		\item Use the descriptors computed by the trained CNN as motion descriptors
+		\item I implemented a 3D CNN based on DeepLearnToolbox by R. B. Palm (2D CNN)
+		\end{itemize}
 	\end{frame}
 	
 	
 	\begin{frame}
-		\frametitle{}
+		\section{Results}
+		\frametitle{Results}
+		
+			The optical flow method gives around 50\% of errors
+			\newline
+			
+			The CNN cannot be trained properly in a reasonable amount of time.
 		
 	\end{frame}
 	
