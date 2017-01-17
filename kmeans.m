@@ -35,10 +35,14 @@ function [k, allk] = kmeans(X, K, epsilon)
     stooop = 1;
 
     % K-means iterations
-    while ((norm(lastk-k)>epsilon) && (stooop < 1000))
+    while ((norm(lastk-k)>epsilon) && (stooop < 50))
 
-        dd = sqdist(k,X);
-        [~,imin] = min(dd,[],1);
+        imin = [];
+        for sep=1:100
+            dd = sqdist(k,X(:,floor((sep-1)*N/100)+1:floor(sep*N/100)));
+            [~,iminsep] = min(dd,[],1);
+            imin = [imin, iminsep];
+        end
         lastk = k;
         for i=1:K
             k(:,i) = mean(X(:,imin==i),2);
@@ -48,7 +52,7 @@ function [k, allk] = kmeans(X, K, epsilon)
     end
 
     
-    if (stooop >= 1000)
+    if (stooop >= 50)
         printf("Warning : Maximum iteration reached.\n");
     end
     
