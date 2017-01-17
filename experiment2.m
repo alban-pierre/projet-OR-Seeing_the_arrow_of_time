@@ -12,11 +12,11 @@ if (parts < 2)
     addpath('DeepLearnToolbox-modified/data/'); 
     addpath('DeepLearnToolbox-modified/util/');
     
-    n_vid = [1:10,26:35];
+    n_vid = [1:180];
     n_vid = [n_vid, n_vid];
-    Nfr = [-ones(1,10), ones(1,10)];%[-1, 1, 1];
+    Nfr = [-ones(1,25), ones(1,155)];%[-1, 1, 1];
     Nfr = [Nfr, -Nfr];
-    fli = [ones(1,20), -ones(1,20)];
+    fli = [ones(1,180), -ones(1,180)];
     frames = 1:86;
     subs = 4;
     show_one_layer = 0;
@@ -26,7 +26,7 @@ if (parts < 2)
 
     N = size(n_vid,2)/2;
     T = size(frames, 2);
-    B = 5;
+    B = 3;
     
     r = randperm(2*N);
     n_vid = n_vid(1,r);
@@ -55,44 +55,47 @@ if (parts < 2)
     train_y = (Nfr(1,1:B) == [1;, -1]);
     cnn = cnnsetup(cnn, train_x, train_y);
 
-    namesbatchs = ['batch1.mat'; 'batch2.mat'; 'batch3.mat'; 'batch4.mat'; 'batch5.mat'; 'batch6.mat'; 'batch7.mat'; 'batch8.mat'];
+    namesbatchs = [repmat('batchs/batch_',99,1), num2str((floor((1:99)/10))'), num2str(mod(1:99,10)'), repmat('.mat', 99,1)];
     
     opts.alpha = 1;
     opts.batchsize = B;
     opts.numepochs = 1;
 
-    for nb=1:2*N/B
-        train_x = zeros(H, W, T, B, 'single');
-        for b=1:B
-            fprintf(2,'.');
-            n = (nb-1)*B + b;
-            for f=frames
+    if (true)
+        for nb=1:2*N/B
+            train_x = zeros(H, W, T, B, 'single');
+            for b=1:B
+                fprintf(2,'.');
+                n = (nb-1)*B + b;
+                for f=frames
     %            train_x = zeros(H, W, T, n);
-                if (fli(1, n) == 1)
-                    train_x(:,:,f,b) = single(mean(single(loadimage(n_vid(1,n), f, H, W))/255,3));
-                else
-                    train_x(:,:,T-f+1,b) = single(mean(single(loadimage(n_vid(1,n), f, H, W))/255,3));
+                    if (fli(1, n) == 1)
+                        train_x(:,:,f,b) = single(mean(single(loadimage(n_vid(1,n), f, H, W))/255,3));
+                    else
+                        train_x(:,:,T-f+1,b) = single(mean(single(loadimage(n_vid(1,n), f, H, W))/255,3));
+                    end
                 end
             end
+            save(namesbatchs(nb,:), 'train_x');
+            clear train_x;
         end
-        save(namesbatchs(nb,:), 'train_x');
-        clear train_x;
+        fprintf(2,'\n');
     end
-    fprintf(2,'\n');
 
     
     train_y = (Nfr == [1; -1]);
     %train_y = [train_y, 1-train_y];
 
+    for i=1:10
     for nb=1:2*N/B
         load(namesbatchs(nb,:));
-        cnn = cnntrain(cnn, train_x, train_y((nb-1)*B+1:nb*B,:), opts);
+        cnn = cnntrain(cnn, train_x, train_y(:, (nb-1)*B+1:nb*B), opts);
         clear train_x;
         fprintf(2,'.');
     end
    
     fprintf(2,'\n');
-
+    end
     size(cnn.fv)
 
     

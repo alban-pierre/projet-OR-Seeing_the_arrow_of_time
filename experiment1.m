@@ -1,6 +1,6 @@
 % Train and test based on optical flow descriptors
 
-parts = 1;
+parts = 3.5;
 
 if (parts < 2)
 
@@ -8,14 +8,15 @@ if (parts < 2)
     pkg load signal;
     pkg load image;
 
-    n_vid = [1:10,26:35];
-    Nfr = [-ones(1,10), ones(1,10)];%[-1, 1, 1];
-    frames = 1:16;
+    n_vid = 1:180;%iii;%[1:1];
+    Nfr = [-ones(1,25), ones(1,155)];%[-1, 1, 1];
+    frames = 1:79;
     subs = 4;
     show_one_layer = 0;
     threshold = 10;
 
-
+    clear opfx;
+    clear opfy;
     if (show_one_layer)
         tt = time();
         [opfx, opfy, im1_pyr, im2_pyr] = multilayer_optical_flow_2_single(n_vid, frames, 10, subs, 3, 0);
@@ -127,12 +128,36 @@ if (parts < 3)
                 keep = sum(abs(motions{f,n}),1) > threshold;
                 fprintf("Proportion = %d\n", sum(keep,2)/size(keep,2));
                 motions{f,n} = motions{f,n}(:,keep);
+                facto = 2;
+                while (size(motions{f,n},2) > 25000)
+                    keep = sum(abs(motions{f,n}),1) > threshold*facto;
+                    fprintf("Proportion = %d\n", sum(keep,2)/size(keep,2));
+                    motions{f,n} = motions{f,n}(:,keep);
+                    facto = facto*2;
+                end
                 fprintf(2,'.');
+                if (true)
+                    a = motions{f,n};
+                    fil = sprintf('batchs/motion_%d_%d.mat', n_vid(1,1), f);
+                    %save(fil, 'a');
+                end
             end
         end
         fprintf(2,'\n');
-        
     end
+end
+
+if (parts == 3.5)
+    clear motions;
+    for n=1:180
+        for f=1:2
+            fil = sprintf('batchs/motion_%d_%d.mat', n, f);
+            a = load(fil);
+            motions{f, n} = a.a;
+            fprintf(2,'.');
+        end
+    end
+    fprintf(2,'\n');
 end
 
 if (parts < 4)
@@ -151,7 +176,9 @@ if (parts < 4)
         end
     end
 
-    histograms = histograms ./ repmat(norm(histograms, 'columns'),K,1);
+	norhis = norm(histograms, 'columns');
+	norhis = (norhis < 0.000001) + norhis;
+    histograms = histograms ./ repmat(norhis,K,1);
 
     fr = reshape(repmat(Ffr',1,N) .* repmat(Nfr,F,1), 1, N*F);
 
@@ -161,10 +188,13 @@ end
 % Now that we have histograms for each videos, we can do the train and test for different sets
 
 
-% Computes train and test sets
-ind = ones(20,1);%[1,1,1];
-r = randperm(20);
-ind = sum((r == (1:20)')(:,1:15),2)';
+	% Computes train and test sets
+err_train = 0;
+err_test = 0;
+for ess = 1:100
+ind = ones(180,1);%[1,1,1];
+r = randperm(180);
+ind = sum((r == (1:180)')(:,1:150),2)';
 
 ind = reshape(repmat(ind,F,1), 1, N*F);
 
@@ -179,9 +209,16 @@ y = fr(:,ind>0.5);
 X = histograms;
 y = fr;
 
-fr_l = ((w'*X+wor>0)*2-1)
+fr_l = ((w'*X+wor>0)*2-1);
 
 
 
-err_train = sum(fr_l.*fr.*ind < -0.5) / 30
-err_test = sum(fr_l.*fr.*(1-ind) < -0.5) / 10
+err_train += sum(fr_l.*fr.*ind < -0.5) / 300;
+err_test += sum(fr_l.*fr.*(1-ind) < -0.5) / 60;
+end
+
+
+
+err_train/100   %0.33657
+err_test/100    %0.47267
+
