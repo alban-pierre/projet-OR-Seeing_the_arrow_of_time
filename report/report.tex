@@ -57,35 +57,31 @@
 		
 		\subsection*{Motion descriptors based on optical flow}
 		
-		
-		
+		I firstly implemented optical flow descriptors based on the Horn \& Schunck algorithm [3]. They assumes that
 		\begin{itemize}
-			\item Assumes brightness constancy $f(x,y,t) = f(x+dx, y+dy, t+dt)$
-			\item Assumes small motions $f(x+dx,y+dy,t+dt) = f(x,y,z) + \frac{\partial f}{\partial x}dx + \frac{\partial f}{\partial y}dy + \frac{\partial f}{\partial t}dt$
+			\item $f(x,y,t) = f(x+dx, y+dy, t+dt)$ (Assumes brightness constancy)
+			\item $f(x+dx,y+dy,t+dt) = f(x,y,z) + \frac{\partial f}{\partial x}dx + \frac{\partial f}{\partial y}dy + \frac{\partial f}{\partial t}dt$ (Assumes small motions)
 		\end{itemize}
-		
+		in order to get an algorithm that only iterates the following equations :
 		\[u = u_{av} - fx\frac{fx u_{av} + fy v_{av} + ft}{\alpha + fx^2 + fy^2}\]
 		\[v = v_{av} - fy\frac{fx u_{av} + fy v_{av} + ft}{\alpha + fx^2 + fy^2}\]
-		
+		The two following figures are the optical flow that I obtained from the first image of this report (and her next frame) :
 		\begin{figure}[h]
 			\begin{minipage}[b]{.49\linewidth}
 				\includegraphics[width=1.0\textwidth]{ofx.png}
-				\caption{Opt. flow along the $x$ axis}
+				\centering{Opt. flow along the $x$ axis}
 			\end{minipage}
 			\hfill
 			\begin{minipage}[b]{0.49\linewidth}
 				\includegraphics[width=1.0\textwidth]{ofy.png}
-				\caption{Opt. flow along the $y$ axis}
+				\centering{Opt. flow along the $y$ axis}
 			\end{minipage}
 			\label{fig:f}
 		\end{figure}
 		
+		In practice this algorithm does not get motion for big objects, but only the motions of its borders. So I tried to implement a better algorithm [4], it basically computes Horn \& Schunck optical flow for different resolutions of an image, wrapping the coarse image result into a finer one. But it relies on a difficult warpping algorithm that I could not get right, and as the subject was more on CNN I abandoned this optical flow computation to focus on CNN.
 		
-			Compute Horn-Schunck method for different scales
-			\newline
-			
-			Warp a coarse result in a finer image as an initialization
-		
+		\subsection*{Convolution Neural Network descriptors}
 		
 		\begin{itemize}
 			\item Train a CNN on videos for classification, recognition or something else
