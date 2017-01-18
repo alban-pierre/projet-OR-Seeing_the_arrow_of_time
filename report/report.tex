@@ -85,9 +85,9 @@
 		
 		I tried to use the architectures presented in [2, 5, 6]. The goal of [2] is that recognizing if frames are in a good temporal order or not forces the CNN to recognize the arrow of time. The goal of [5] is that motions of objects (like explosions) gives many informations about the arrow of time, and computing the segmentation helps a lot in computing motions. The algorithm in [6] serve just as a reference.
 		
-		Unfortunately the time of training for simpler structures was too long and I could not train any of the previous architectures. Then I tried to use 3 dimensional CNN. The idea was that subsampling in time whithin the 3D CNN is a big gain in time (this subsampling in time is inexistant in the previous architectures were we take the video frame by frame). But here again the training phase was too long.
+		Unfortunately the time of training for simpler structures was too long and I could not train any of the previous architectures. Then I tried to use 3 dimensional CNN. The idea was that subsampling in time whithin the 3D CNN is a gain in time (this subsampling in time is inexistant in the previous architectures where we take the video frame by frame). But here again the training phase was too long.
 		
-		I recoded partially the DeepLearnToolbox by R. B. Palm [7] to create a 3D CNN toolbox.
+		I recoded partially the DeepLearnToolbox by R. B. Palm [7] to create the 3D CNN toolbox.
 		
 		\section*{Results}
 		
@@ -95,6 +95,7 @@
 			
 			Here are the training and testing results that I got depending on the $C$ parameter of the SVM :
 		
+		\section*{References}
 		\scriptsize{
 		\begin{itemize}
 			
