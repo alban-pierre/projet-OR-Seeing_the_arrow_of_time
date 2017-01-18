@@ -1,0 +1,139 @@
+\documentclass[10pt,a4paper]{report}
+\usepackage[latin1]{inputenc}
+%\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+
+\begin{document}
+	Alban Pierre
+	\newline
+	20th January 2017
+	\newline
+	\begin{center}
+		\textbf{\Large{Topic C : seeing the arrow of time}}
+		\newline
+	\end{center}
+	
+	\section*{Introduction}
+	
+	Humans can see if a video is running forward or backward, like in the following 3 images we can easily tell that it is backward.
+	\newline
+	\begin{figure}[h]
+		\begin{minipage}[b]{.30\linewidth}
+			\includegraphics[width=1.0\textwidth]{im01.jpeg}
+			%\caption{1000 first iterations (3*2, one)}
+		\end{minipage}
+		\hspace{5pt}
+		\begin{minipage}[b]{0.30\linewidth}
+			\includegraphics[width=1.0\textwidth]{im30.jpeg}
+			%\caption{1000 last iterations (3*2, one)}
+		\end{minipage}
+		\hspace{5pt}
+		\begin{minipage}[b]{0.30\linewidth}
+			\includegraphics[width=1.0\textwidth]{im50.jpeg}
+			%\caption{1000 last iterations (3*2, one)}
+		\end{minipage}
+		\label{fig:f}
+	\end{figure}
+	
+	Following the article [1], I tried to implement an algorithm that tackle this problem.
+	
+	\section*{General structure of the algorithm}
+	
+		The first step is to compute descriptors, there are many ways to do this so I explain it in details in the next section.
+		
+		Then given these descriptors, we have to reduce the size of each video representation (there are many descriptors by video), so I run a k-means algorithm to get only the $K$ most used descriptors and I assign each descriptor to his closest descriptor computed by k-means. Then we can represent each video by a vector of size $K$ where at index $k$ there is the number of occurrences of descriptor $k$.
+		
+		In other words, we have constructed histograms that represent videos. Eventually I run an SVM classifier on these histograms (normalized). I used the barrier method to compute the SVM.
+	
+		\section*{Computation of descriptors}
+		
+		This is the main choice of the algorithm, as we have to compute descriptors that contains information about the arrow of time. For this I could have chosen to use pre-trained convolutionnal neural networks, but these networks were pre-trained for an other task which means they could have lost information about the arrow of time, or simply be not efficient.
+		
+		So I choose to compute motion descriptors based on optical flow, and then train my own CNN.  
+		
+		\subsection*{Motion descriptors based on optical flow}
+		
+		
+		
+		\begin{itemize}
+			\item Assumes brightness constancy $f(x,y,t) = f(x+dx, y+dy, t+dt)$
+			\item Assumes small motions $f(x+dx,y+dy,t+dt) = f(x,y,z) + \frac{\partial f}{\partial x}dx + \frac{\partial f}{\partial y}dy + \frac{\partial f}{\partial t}dt$
+		\end{itemize}
+		
+		\[u = u_{av} - fx\frac{fx u_{av} + fy v_{av} + ft}{\alpha + fx^2 + fy^2}\]
+		\[v = v_{av} - fy\frac{fx u_{av} + fy v_{av} + ft}{\alpha + fx^2 + fy^2}\]
+		
+		\begin{figure}[h]
+			\begin{minipage}[b]{.49\linewidth}
+				\includegraphics[width=1.0\textwidth]{ofx.png}
+				\caption{Opt. flow along the $x$ axis}
+			\end{minipage}
+			\hfill
+			\begin{minipage}[b]{0.49\linewidth}
+				\includegraphics[width=1.0\textwidth]{ofy.png}
+				\caption{Opt. flow along the $y$ axis}
+			\end{minipage}
+			\label{fig:f}
+		\end{figure}
+		
+		
+			Compute Horn-Schunck method for different scales
+			\newline
+			
+			Warp a coarse result in a finer image as an initialization
+		
+		
+		\begin{itemize}
+			\item Train a CNN on videos for classification, recognition or something else
+		\item Use the descriptors computed by the trained CNN as motion descriptors
+		\end{itemize}
+		
+		I implemented a 3D CNN toolbox based on DeepLearnToolbox by R. B. Palm (2D CNN)
+		\newline
+		
+		Train a CNN on videos for seeing the arrow of time using a CNN structure used for segmentation
+		\newline
+		
+		Train a CNN on videos for seeing if the sequence of frames is in a possible order or not
+		
+		\section{Results}
+		
+			The optical flow method gives around 50\% of errors
+			\newline
+			
+			The CNN cannot be trained properly in a reasonable amount of time.
+		
+		\scriptsize{
+		\begin{itemize}
+			
+			\item[*] [1] Pickup, L. C., Pan, Z., Wei, D., Shih, Y., Zhang, C., Zisserman, A., ... \& Freeman, W. T. (2014). Seeing the arrow of time. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (pp. 2035-2042).
+			
+			\item[*] [2] Misra, I., Zitnick, C. L., \& Hebert, M. (2016, October). Shuffle and learn: unsupervised learning using temporal order verification. In European Conference on Computer Vision (pp. 527-544). Springer International Publishing.
+			
+			\item[*] [3] Horn, B. K., \& Schunck, B. G. (1981). Determining optical flow. Artificial intelligence, 17(1-3), 185-203.
+			
+			\item[*] [4] Brox, T., Bruhn, A., Papenberg, N., \& Weickert, J. (2004, May). High accuracy optical flow estimation based on a theory for warping. In European conference on computer vision (pp. 25-36). Springer Berlin Heidelberg.
+			
+			\item[*] [5] Long, J., Shelhamer, E., \& Darrell, T. (2015). Fully convolutional networks for semantic segmentation. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (pp. 3431-3440).
+			
+			\item[*] [6] Krizhevsky, A., Sutskever, I., \& Hinton, G. E. (2012). Imagenet classification with deep convolutional neural networks. In Advances in neural information processing systems (pp. 1097-1105).
+			
+			\item[*] [7] Palm, R. B. (2012). Prediction as a candidate for learning deep hierarchical models of data. Technical University of Denmark, 5.
+			
+		\end{itemize}
+	}
+	
+	Thank you for your attention !
+	
+
+\end{document}
+
+
+
+
+
+
