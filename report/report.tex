@@ -83,25 +83,17 @@
 		
 		\subsection*{Convolution Neural Network descriptors}
 		
-		\begin{itemize}
-			\item Train a CNN on videos for classification, recognition or something else
-		\item Use the descriptors computed by the trained CNN as motion descriptors
-		\end{itemize}
+		I tried to use the architectures presented in [2, 5, 6]. The goal of [2] is that recognizing if frames are in a good temporal order or not forces the CNN to recognize the arrow of time. The goal of [5] is that motions of objects (like explosions) gives many informations about the arrow of time, and computing the segmentation helps a lot in computing motions. The algorithm in [6] serve just as a reference.
 		
-		I implemented a 3D CNN toolbox based on DeepLearnToolbox by R. B. Palm (2D CNN)
-		\newline
+		Unfortunately the time of training for simpler structures was too long and I could not train any of the previous architectures. Then I tried to use 3 dimensional CNN. The idea was that subsampling in time whithin the 3D CNN is a big gain in time (this subsampling in time is inexistant in the previous architectures were we take the video frame by frame). But here again the training phase was too long.
 		
-		Train a CNN on videos for seeing the arrow of time using a CNN structure used for segmentation
-		\newline
+		I recoded partially the DeepLearnToolbox by R. B. Palm [7] to create a 3D CNN toolbox.
 		
-		Train a CNN on videos for seeing if the sequence of frames is in a possible order or not
+		\section*{Results}
 		
-		\section{Results}
-		
-			The optical flow method gives around 50\% of errors
-			\newline
+			As CNNs cannot be trained properly in a reasonable amount of time, I have only results based on the optical flow descriptors (parameters : the images are subsampled by a factor of 4, I used the 80 first frames of the 180 videos - each also fliped in time - of the dataset of [1], and I used histograms of size 100).
 			
-			The CNN cannot be trained properly in a reasonable amount of time.
+			Here are the training and testing results that I got depending on the $C$ parameter of the SVM :
 		
 		\scriptsize{
 		\begin{itemize}
@@ -122,8 +114,6 @@
 			
 		\end{itemize}
 	}
-	
-	Thank you for your attention !
 	
 
 \end{document}
