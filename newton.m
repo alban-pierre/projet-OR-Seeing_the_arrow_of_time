@@ -14,18 +14,22 @@ function [x_new, gap] = newton(t,x,f,grad,hess)
     bt = 1;
     stooop = 1;
     while ((f(x+bt*dxnt,t) >= fx + alpha*bt*g'*dxnt) && (stooop < 1000))
-	bt *= beta;
-	stooop++;
+        bt *= beta;
+        stooop++;
     end
-    assert(stooop<1000);
+    if (stooop>=1000)
+        printf('Assert stoop<1000 is false\n');
+    end
 
     if (stooop <= 1)
-	stooop = 1;
-	while ((f(x+(bt/beta)*dxnt,t) < f(x+bt*dxnt,t)) && (stooop < 1000))
-	    bt /= beta;
-	    stooop++;
-	end
-	assert(stooop<1000);
+        stooop = 1;
+        while ((f(x+(bt/beta)*dxnt,t) < f(x+bt*dxnt,t)) && (stooop < 1000))
+            bt /= beta;
+            stooop++;
+        end
+        if (stooop>=1000)
+            printf('Assert stoop<1000 is false\n');
+        end
     end
     x_new = x+bt*dxnt;
     gap = -bt*g'*dxnt;

@@ -70,9 +70,9 @@ St = 1; % Width subsampling
         %Ws = floor((W-D+1)/Sw); % Video height after subsampling
         %Ts = floor((T-D+1)/St); % Video height after subsampling
 
-C = 10; % SVM parameter
-mu = 15; % SVM parameter
-tol = 0.001; % Precision of SVM
+%C = 10; % SVM parameter
+%mu = 15; % SVM parameter
+%tol = 0.001; % Precision of SVM
 
 
     % Computation of motion descriptors of structure :
@@ -176,8 +176,8 @@ if (parts < 4)
         end
     end
 
-	norhis = norm(histograms, 'columns');
-	norhis = (norhis < 0.000001) + norhis;
+    norhis = norm(histograms, 'columns');
+    norhis = (norhis < 0.000001) + norhis;
     histograms = histograms ./ repmat(norhis,K,1);
 
     fr = reshape(repmat(Ffr',1,N) .* repmat(Nfr,F,1), 1, N*F);
@@ -187,38 +187,69 @@ end
 
 % Now that we have histograms for each videos, we can do the train and test for different sets
 
+assert(false);
 
-	% Computes train and test sets
-err_train = 0;
-err_test = 0;
-for ess = 1:100
-ind = ones(180,1);%[1,1,1];
-r = randperm(180);
-ind = sum((r == (1:180)')(:,1:150),2)';
+load('a1.mat');
+load('a2.mat');
+N = 180;
+F = 2;
+C = 10; % SVM parameter
+mu = 15; % SVM parameter
+tol = 0.001; % Precision of SVM
 
-ind = reshape(repmat(ind,F,1), 1, N*F);
+    % Computes train and test sets
+allC = [0.01, 0.1];%1, 10, 100, 1000, 10000, 100000];
+n_ess = 5;
 
-X = histograms(:,ind>0.5);
-y = fr(:,ind>0.5);
+err_train = [0,0,err_train];%zeros(1,size(allC,2));
+err_test = [0,0,err_test];%zeros(1,size(allC,2));
+
+for ess2=1:size(allC,2)
+    for ne=1:n_ess
+        r = randperm(180);
+        C = allC(1,ess2);
+        for ess = 1:6
+            ind = ones(180,1);%[1,1,1];
+                              %r = randperm(180);
+            r = circshift(r', 30)';
+            ind = sum((r == (1:180)')(:,1:150),2)';
+            
+            ind = reshape(repmat(ind,F,1), 1, N*F);
+
+            X = histograms(:,ind>0.5);
+            y = fr(:,ind>0.5);
 
     % for i=1:size(ind,1)
 
-[w, wor] = svm_p(X, y, C, mu, tol);
+            [w, wor] = svm_p(X, y, C, mu, tol);
 
 
-X = histograms;
-y = fr;
+            X = histograms;
+            y = fr;
 
-fr_l = ((w'*X+wor>0)*2-1);
+            fr_l = ((w'*X+wor>0)*2-1);
 
 
 
-err_train += sum(fr_l.*fr.*ind < -0.5) / 300;
-err_test += sum(fr_l.*fr.*(1-ind) < -0.5) / 60;
+            err_train(1, ess2) += sum(fr_l.*fr.*ind < -0.5) / 300;
+            err_test(1,ess2) += sum(fr_l.*fr.*(1-ind) < -0.5) / 60;
+            fprintf(2, '.');
+        end
+        fprintf(2, ' ');
+    end
+    fprintf(2, '\n');
 end
 
+errtrain = err_train/6/n_ess   %0.33657
+errtest = err_test/6/n_ess    %0.47267
 
+allC = [0.01, 0.1, 1, 10, 100, 1000, 10000, 100000];
 
-err_train/100   %0.33657
-err_test/100    %0.47267
-
+figure;
+semilogx(allC, errtrain, '-k', 'linewidth', 3);
+hold on;
+semilogx(allC, errtest, '-r', 'linewidth', 3);
+grid on;
+xlabel('C parameter of the SVM');
+ylabel('Error');
+legend('Train', 'Test', 'location', 'southwest');
