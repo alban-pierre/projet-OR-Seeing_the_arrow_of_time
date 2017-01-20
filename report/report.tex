@@ -19,7 +19,7 @@
 	
 	\section*{Introduction}
 	
-	Humans can see if a video is running forward or backward, like in the following 3 images we can easily tell that it is backward.
+	Humans can see if a video is running forward or backward, like in the following 3 images we can easily tell it is backward.
 	\newline
 	\begin{figure}[h]
 		\begin{minipage}[b]{.30\linewidth}
@@ -39,11 +39,11 @@
 		\label{fig:f}
 	\end{figure}
 	
-	Following the article [1], I tried to implement an algorithm that tackle this problem.
+	\hspace{-15pt}Following the article [1], I tried to implement an algorithm to solve this problem.
 	
 	\section*{General structure of the algorithm}
 	
-		The first step is to compute descriptors, there are many ways to do this so I explain it in details in the next section.
+		In the first step I compute descriptors, there are many ways to do this so I explain it in details in the next section.
 		
 		Then given these descriptors, we have to reduce the size of each video representation (there are many descriptors by video), so I run a k-means algorithm to get only the $K$ most used descriptors and I assign each descriptor to his closest descriptor computed by k-means. Then we can represent each video by a vector of size $K$ where at index $k$ there is the number of occurrences of descriptor $k$.
 		
@@ -51,7 +51,7 @@
 	
 		\section*{Computation of descriptors}
 		
-		This is the main choice of the algorithm, as we have to compute descriptors that contains information about the arrow of time. For this I could have chosen to use pre-trained convolutionnal neural networks, but these networks were pre-trained for an other task which means they could have lost information about the arrow of time, or simply be not efficient.
+		This is the main choice of the algorithm, as we have to compute descriptors that contains information about the arrow of time. For this I could have chosen to use pre-trained convolutionnal neural networks, but these networks were pre-trained for an other task which means they could have lost information about the arrow of time, or simply be inefficient.
 		
 		So I choose to compute motion descriptors based on optical flow, and then train my own CNN.  
 		
@@ -65,7 +65,7 @@
 		in order to get an algorithm that only iterates the following equations :
 		\[u = u_{av} - fx\frac{fx u_{av} + fy v_{av} + ft}{\alpha + fx^2 + fy^2}\]
 		\[v = v_{av} - fy\frac{fx u_{av} + fy v_{av} + ft}{\alpha + fx^2 + fy^2}\]
-		The two following figures are the optical flow that I obtained from the first image of this report (and her next frame) :
+		The two following figures are the optical flow that I obtained from the first image of this report (and its next frame) :
 		\begin{figure}[h]
 			\begin{minipage}[b]{.49\linewidth}
 				\includegraphics[width=1.0\textwidth]{ofx.png}
@@ -91,9 +91,18 @@
 		
 		\section*{Results}
 		
-			As CNNs cannot be trained properly in a reasonable amount of time, I have only results based on the optical flow descriptors (parameters : the images are subsampled by a factor of 4, I used the 80 first frames of the 180 videos - each also fliped in time - of the dataset of [1], and I used histograms of size 100).
+			As CNNs cannot be trained in a reasonable amount of time, I have only results based on the optical flow descriptors (parameters : the images are subsampled by a factor of 4, I used the 80 first frames of the 180 videos - each also fliped in time - of the dataset of [1], and I used histograms of size 100).
 			
 			Here are the training and testing results that I got depending on the $C$ parameter of the SVM :
+		
+		\begin{figure}[h]
+			\centering{\includegraphics[width=0.75\textwidth]{results.png}}
+			
+			\centering{Training and testing error based on Horn \& Schunck optical flow. It shows the average of 5 runs of 6-fold cross-validation}
+			\label{fig:f}
+		\end{figure}
+		
+		It looks like an Occam's razor, and the results obtained are very poor (46\% or error at its best)
 		
 		\section*{References}
 		\scriptsize{
